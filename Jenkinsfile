@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_IMAGE = "almasahmed/secureapp:1.0"
+    }
+
     stages {
 
         stage('Checkout Code') {
@@ -9,27 +13,31 @@ pipeline {
             }
         }
 
-        stage('Build with Maven') {
+        stage('Build Application') {
             steps {
-                echo 'Building application...'
                 sh 'mvn clean package -DskipTests'
             }
         }
 
-        stage('Unit Test') {
+        stage('Build Docker Image') {
             steps {
-                echo 'Running tests...'
-                sh 'mvn test'
+                sh 'docker build -t $DOCKER_IMAGE .'
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                sh 'docker push $DOCKER_IMAGE'
             }
         }
     }
 
     post {
         success {
-            echo 'Build completed successfully!'
+            echo 'CI Pipeline completed successfully!'
         }
         failure {
-            echo 'Build failed!'
+            echo 'CI Pipeline failed!'
         }
     }
 }
