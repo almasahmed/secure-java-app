@@ -2,35 +2,38 @@ pipeline {
     agent any
 
     stages {
-
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/almasahmed/secure-java-app.git'
+                checkout scm
             }
         }
 
         stage('Build') {
             steps {
-                sh 'chmod +x mvnw'
-                sh './mvnw clean package -DskipTests'
+                dir('secureapp') {
+                    sh 'chmod +x mvnw'
+                    sh './mvnw clean compile'
+                }
             }
         }
 
         stage('Unit Test') {
             steps {
-                sh './mvnw test'
+                dir('secureapp') {
+                    sh './mvnw test'
+                }
             }
         }
     }
 
     post {
+        success {
+            echo 'CI Pipeline completed successfully!'
+        }
         failure {
             echo 'CI Pipeline failed!'
         }
-        success {
-            echo 'CI Pipeline succeeded!'
-        }
     }
 }
+
 
